@@ -2,7 +2,7 @@ from __future__ import absolute_import, print_function
 
 import cv2
 import time
-import math
+import numpy as np
 
 from . import Experiment
 from ..metrics import iou
@@ -59,26 +59,35 @@ class ExperimentRealtime(Experiment):
                         image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
                     elif image.ndim == 3:
                         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-                    
+
                     start_time = time.time()
                     if f == init_frame:
                         tracker.init(image, anno[f])
+                        elapsed_time = time.time() - start_time
                         states.append([1])
 
-                        failed = False
+                        acc_time = 1. / self.default_fps
                         grace = self.grace - 1
-                    elif not failed:
+                        failed = False
+                    elif failed:
+                        states.append([0])
+                        elapsed_time = np.nan
+                    else:
                         if grace > 0:
                             state = tracker.update(image)
-
+                            elapsed_time = time.time() - start_time
+                            acc_time += 1. / self.default_fps
                             grace -= 1
-                            if grace == 1:
-                                elapsed_time = time.time() - start_time
-                                next_frame = f + max(1, round(math.floor(elapsed_time * self.default_fps)))
-                        elif f == next_frame:
-                            state = tracker.update(image)
-                        else:
+                            if grace == 0:
+                                next_frame = init_frame + round(np.floor((acc_time + max(1. / self.default_fps, elapsed_time)) * self.default_fps))
+                        elif f < next_frame:
                             state = state
+                            elapsed_time = np.nan
+                        else:
+                            state = tracker.update(image)
+                            elapsed_time = time.time() - start_time
+                            acc_time += max(1. / self.default_fps, elapsed_time)
+                            next_frame = init_frame + round(np.floor((acc_time + max(1. / self.default_fps, elapsed_time)) * self.default_fps))
                         
                         if iou(state, anno[f]) > self.failure_overlap:
                             states.append(state)
@@ -86,9 +95,7 @@ class ExperimentRealtime(Experiment):
                             failed = True
                             states.append([2])
                             init_frame = next_frame + self.skip_initialize
-                    else:
-                        states.append([0])
-                    times.append(time.time() - start_time)
+                    times.append(elapsed_time)
                     
                     if visualize:
                         if f == init_frame:
