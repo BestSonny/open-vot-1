@@ -35,7 +35,7 @@ class TransformGOTURN(object):
         assert len(args) in [2, 4]
         if len(args) == 2:
             img_z, img_x, bndbox_z, bndbox_x = \
-                args[0], args[1], args[0], args[1]
+                args[0], args[0], args[1], args[1]
         elif len(args) == 4:
             img_z, img_x, bndbox_z, bndbox_x = args
 

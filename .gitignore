@@ -1,8 +1,11 @@
 .*
 *.pyc
 __pycache__/
+cache/
+pretrained/
+logs/
+results/
+records/
+reports/
 data
-cache
-pretrained
-logs
 !.gitignore

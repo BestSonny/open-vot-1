@@ -161,7 +161,7 @@ class ImageNetObject(Dataset):
         if self.transform:
             return self.transform(img, bndbox)
         else:
-            return img_file, bndbox
+            return img, bndbox
 
     def __len__(self):
         return self.size
