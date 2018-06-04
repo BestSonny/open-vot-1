@@ -42,14 +42,14 @@ class Experiment(object):
         times_file = os.path.join(log_dir, '%s_time.txt' % seq_name)
 
         # record tracking results
-        states_str = ''
+        states_str = []
         for state in states:
             assert len(state) in [1, 4, 6]
-            states_str += '\n'
             if len(state) == 1:
-                states_str += '%d' % state[0]
+                states_str.append('%d' % state[0])
             else:
-                states_str += str.join(',', ['%.4f' % s for s in state])
+                states_str.append(str.join(',', ['%.4f' % s for s in state]))
+        states_str = str.join('\n', states_str)
         with open(states_file, 'w') as f:
             f.write(states_str)
 
@@ -66,3 +66,4 @@ class Experiment(object):
 
 
 from .unsupervised import ExperimentUnsupervised
+from .supervised import ExperimentSupervised
