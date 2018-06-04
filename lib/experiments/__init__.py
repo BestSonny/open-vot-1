@@ -67,3 +67,4 @@ class Experiment(object):
 
 from .unsupervised import ExperimentUnsupervised
 from .supervised import ExperimentSupervised
+from .realtime import ExperimentRealtime
